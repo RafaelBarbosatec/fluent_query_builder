@@ -16,8 +16,6 @@ import 'models/query_builder_options.dart';
 import 'models/raw.dart';
 import 'models/select.dart';
 import 'models/update.dart';
-//import 'query_executors/mysql_executor.dart';
-import 'query_executors/mysql_executor_sqljocky5.dart';
 import 'query_executors/postgre_sql_executor.dart';
 import 'query_executors/query_executor.dart';
 
@@ -52,7 +50,10 @@ class DbLayer {
       }
     } else {
       if (connectionInfo.numberOfProcessors > 1 && connectionInfo.usePool) {
-        executor = MySqlExecutorPool(nOfProces, connectionInfo: connectionInfo);
+        executor = MyMySqlExecutorPool(
+          maxConnections: nOfProces,
+          connectionInfo: connectionInfo,
+        );
       } else {
         executor = MyMySqlExecutor(connectionInfo: connectionInfo);
         await executor.open();
