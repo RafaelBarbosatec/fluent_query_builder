@@ -160,10 +160,10 @@ class MyMySqlExecutor extends QueryExecutor<MySQLConnection> {
 
           try {
             final stmt = await tx.prepare(
-              query,
+              fetchSql,
             );
             readResults = await stmt.execute(
-              [writeResults.affectedRows],
+              [writeResults.lastInsertID],
             );
           } catch (e) {
             //reconnect in Error
@@ -173,17 +173,17 @@ class MyMySqlExecutor extends QueryExecutor<MySQLConnection> {
               //print('MySqlExecutor@query reconnect in Error');
               await reconnect();
               final stmt = await tx.prepare(
-                query,
+                fetchSql,
               );
               readResults = await stmt.execute(
-                [writeResults.affectedRows],
+                [writeResults.lastInsertID],
               );
             } else {
               rethrow;
             }
           }
 
-          var mapped = readResults.map((r) => r.toList()).toList();
+          var mapped = readResults.rows.map((e) => _getListValues(e)).toList();
           //print('mapped $mapped');
 
           return mapped;
@@ -238,7 +238,7 @@ class MyMySqlExecutor extends QueryExecutor<MySQLConnection> {
     for (final row in result.rows) {
       var map = <String, dynamic>{};
       //print('key: ${fields[0].name}, value: ${row[0]}');
-      for (var i = 0; i < result.length; i++) {
+      for (var i = 0; i < result.cols.length; i++) {
         map.addAll({fields.elementAt(i).name: row.colAt(i)});
       }
       results.add(map);
@@ -292,6 +292,14 @@ class MyMySqlExecutor extends QueryExecutor<MySQLConnection> {
   @override
   Future<void> rollback() async {
     return Future.value();
+  }
+
+  List _getListValues(ResultSetRow e) {
+    var values = <dynamic>[];
+    for (var i = 0; i < e.numOfColumns; i++) {
+      values.add(e.colAt(i));
+    }
+    return values;
   }
 }
 
