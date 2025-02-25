@@ -2,26 +2,22 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_query_builder/src/models/validator.dart';
+import 'package:fluent_query_builder/src/query_executors/my_mysql_executor.dart';
 
-import 'models/connection_info.dart';
 import 'exceptions/illegal_argument_exception.dart';
 import 'exceptions/not_implemented_exception.dart';
-import 'models/raw.dart';
-import 'query_executors/postgre_sql_executor.dart';
-//import 'query_executors/mysql_executor.dart';
-import 'query_executors/mysql_executor_sqljocky5.dart';
-import 'query_executors/query_executor.dart';
-import 'models/query_builder.dart';
-
+import 'fluent_model_base.dart';
+import 'models/connection_info.dart';
+import 'models/delete.dart';
 import 'models/expression.dart';
-
+import 'models/insert.dart';
+import 'models/query_builder.dart';
 import 'models/query_builder_options.dart';
+import 'models/raw.dart';
 import 'models/select.dart';
 import 'models/update.dart';
-import 'models/insert.dart';
-import 'models/delete.dart';
-
-import 'fluent_model_base.dart';
+import 'query_executors/postgre_sql_executor.dart';
+import 'query_executors/query_executor.dart';
 
 class DbLayer {
   late QueryExecutor executor;
@@ -54,9 +50,12 @@ class DbLayer {
       }
     } else {
       if (connectionInfo.numberOfProcessors > 1 && connectionInfo.usePool) {
-        executor = MySqlExecutorPool(nOfProces, connectionInfo: connectionInfo);
+        executor = MyMySqlExecutorPool(
+          maxConnections: nOfProces,
+          connectionInfo: connectionInfo,
+        );
       } else {
-        executor = MySqlExecutor(connectionInfo: connectionInfo);
+        executor = MyMySqlExecutor(connectionInfo: connectionInfo);
         await executor.open();
       }
     }

@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:fluent_query_builder/fluent_query_builder.dart';
 
 void main() async {
@@ -32,7 +33,7 @@ CREATE TABLE `table_01` (
   `test` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 ''');
 
     // delete table
@@ -44,7 +45,7 @@ CREATE TABLE `table_02` (
   `idtb1` int(255) DEFAULT NULL,
   `info` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 ''');
 
     await db.delete().from('table_01').whereSafe('id', '=', 11).exec();

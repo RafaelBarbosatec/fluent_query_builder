@@ -21,6 +21,7 @@ dependencies:
   galileo_sqljocky5: ^3.0.0 #Null safety
   pool: ^1.5.0 #Null safety
   logging: ^1.0.1 #Null safety
+  mysql_client: ^0.0.27
   
 dev_dependencies:
   test: ^1.17.2 #Null safety
