@@ -90,7 +90,7 @@ CREATE TABLE `table_02` (
     // select query
     query = db
         .select()
-        .fields(['name', 'b.info', 'b.id'])
+        .fields(['name', 'b.info', 'b.id', 'a.test'])
         .from('table_01', alias: 'a')
         .leftJoin('table_02', 'a.id', '=', 'b.idtb1', alias: 'b')
         .offset(0)
