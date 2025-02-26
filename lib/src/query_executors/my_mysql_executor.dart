@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:fluent_query_builder/src/util/string_ext.dart';
 import 'package:logging/logging.dart';
 import 'package:mysql_client/mysql_client.dart';
 
@@ -235,14 +234,8 @@ class MyMySqlExecutor extends QueryExecutor<MySQLConnection> {
       }
     }
 
-    var fields = result.cols;
     for (final row in result.rows) {
-      var map = <String, dynamic>{};
-      //print('key: ${fields[0].name}, value: ${row[0]}');
-      for (var i = 0; i < result.cols.length; i++) {
-        map.addAll({fields.elementAt(i).name: row.colAt(i)?.convertToType()});
-      }
-      results.add(map);
+      results.add(row.typedAssoc());
     }
     //print('MySqlExecutor@getAsMap results ${results}');
     return results;
@@ -297,11 +290,7 @@ class MyMySqlExecutor extends QueryExecutor<MySQLConnection> {
   }
 
   List _getListValues(ResultSetRow e) {
-    var values = <dynamic>[];
-    for (var i = 0; i < e.numOfColumns; i++) {
-      values.add(e.colAt(i)?.convertToType());
-    }
-    return values;
+    return e.typedAssoc().values.toList();
   }
 }
 
@@ -437,13 +426,8 @@ class MyMySqlExecutorPool extends QueryExecutor<MySQLConnectionPool> {
       Utils.substitutionMapToList(substitutionValues),
     );
 
-    var fields = result.cols;
     for (final row in result.rows) {
-      var map = <String, dynamic>{};
-      for (var i = 0; i < result.cols.length; i++) {
-        map.addAll({fields.elementAt(i).name: row.colAt(i)?.convertToType()});
-      }
-      results.add(map);
+      results.add(row.typedAssoc());
     }
     return results;
   }
@@ -465,8 +449,9 @@ class MyMySqlExecutorPool extends QueryExecutor<MySQLConnectionPool> {
 
   @override
   Future<dynamic> transaction2(
-      Future<dynamic> Function(QueryExecutor) queryBlock,
-      {int? commitTimeoutInSeconds}) async {
+    Future<dynamic> Function(QueryExecutor) queryBlock, {
+    int? commitTimeoutInSeconds,
+  }) async {
     return connection!.transactional(
       (tx) async {
         return await queryBlock(
@@ -496,11 +481,7 @@ class MyMySqlExecutorPool extends QueryExecutor<MySQLConnectionPool> {
   }
 
   List _getListValues(ResultSetRow e) {
-    var values = <dynamic>[];
-    for (var i = 0; i < e.numOfColumns; i++) {
-      values.add(e.colAt(i)?.convertToType());
-    }
-    return values;
+    return e.typedAssoc().values.toList();
   }
 
   @override
