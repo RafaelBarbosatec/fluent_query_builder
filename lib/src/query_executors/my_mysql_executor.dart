@@ -112,7 +112,7 @@ class MyMySqlExecutor extends QueryExecutor<MySQLConnection> {
           rethrow;
         }
       }
-      return results.map((r) => r.toList()).toList();
+      return results.rows.map((e) => _getListValues(e)).toList();
     } else {
       return Future(() async {
         return connection!.transactional((tx) async {
@@ -184,10 +184,7 @@ class MyMySqlExecutor extends QueryExecutor<MySQLConnection> {
             }
           }
 
-          var mapped = readResults.rows.map((e) => _getListValues(e)).toList();
-          //print('mapped $mapped');
-
-          return mapped;
+          return readResults.rows.map((e) => _getListValues(e)).toList();
         });
       });
     }
