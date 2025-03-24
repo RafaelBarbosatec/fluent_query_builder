@@ -7,14 +7,15 @@ void main() async {
   final mariadbInfo = DBConnectionInfo(
     reconnectIfConnectionIsNotOpen: true,
     host: 'localhost',
-    database: 'banco_teste',
+    database: 'boleiro',
     driver: ConnectionDriver.mysql,
     port: 3306,
-    username: 'sisadmin',
-    password: 's1sadm1n',
-    charset: 'utf8',
-    setNumberOfProcessorsFromPlatform: false,
-    numberOfProcessors: 1,
+    username: 'admin',
+    password: '12345678',
+    useSSL: true,
+    // charset: 'utf8',
+    // setNumberOfProcessorsFromPlatform: false,
+    // numberOfProcessors: 1,
   );
 
   final db = DbLayer(mariadbInfo);

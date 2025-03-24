@@ -112,7 +112,7 @@ class MyMySqlExecutor extends QueryExecutor<MySQLConnection> {
           rethrow;
         }
       }
-      return results.rows.map((e) => _getListValues(e)).toList();
+      return results.getResult();
     } else {
       return Future(() async {
         return connection!.transactional((tx) async {
@@ -184,7 +184,7 @@ class MyMySqlExecutor extends QueryExecutor<MySQLConnection> {
             }
           }
 
-          return readResults.rows.map((e) => _getListValues(e)).toList();
+          return readResults.getResult();
         });
       });
     }
@@ -293,13 +293,13 @@ class MyMySqlExecutor extends QueryExecutor<MySQLConnection> {
     return Future.value();
   }
 
-  List _getListValues(ResultSetRow e) {
-    var values = <dynamic>[];
-    for (var i = 0; i < e.numOfColumns; i++) {
-      values.add(e.colAt(i)?.convertToType());
-    }
-    return values;
-  }
+  // List _getListValues(ResultSetRow e) {
+  //   var values = <dynamic>[];
+  //   for (var i = 0; i < e.numOfColumns; i++) {
+  //     values.add(e.colAt(i)?.convertToType());
+  //   }
+  //   return values;
+  // }
 }
 
 class MyMySqlExecutorPool extends QueryExecutor<MySQLConnectionPool> {
@@ -370,7 +370,7 @@ class MyMySqlExecutorPool extends QueryExecutor<MySQLConnectionPool> {
       var results = await stmt.execute(
         Utils.substitutionMapToList(substitutionValues),
       );
-      return results.rows.map((e) => _getListValues(e)).toList();;
+      return results.getResult();
     } else {
       return Future(() async {
         return connection!.transactional((tx) async {
@@ -402,7 +402,7 @@ class MyMySqlExecutorPool extends QueryExecutor<MySQLConnectionPool> {
             [writeResults.lastInsertID],
           );
 
-          var mapped = readResults.rows.map((e) => _getListValues(e)).toList();
+          var mapped = readResults.getResult();
 
           return mapped;
         });
@@ -492,16 +492,50 @@ class MyMySqlExecutorPool extends QueryExecutor<MySQLConnectionPool> {
     throw UnsupportedOperationException('rollback not implemented');
   }
 
-  List _getListValues(ResultSetRow e) {
-    var values = <dynamic>[];
-    for (var i = 0; i < e.numOfColumns; i++) {
-      values.add(e.colAt(i)?.convertToType());
-    }
-    return values;
-  }
+  // List _getListValues(ResultSetRow e) {
+  //   var values = <dynamic>[];
+  //   for (var i = 0; i < e.numOfColumns; i++) {
+  //     values.add(e.colAt(i)?.convertToType());
+  //   }
+  //   return values;
+  // }
 
   @override
   Future reconnectIfNecessary() {
     throw UnimplementedError();
+  }
+}
+
+extension IResultSetExt on IResultSet {
+  List<List<dynamic>> getResult() {
+    var rersult = <List>[];
+    for (final row in rows) {
+      var values = [];
+      for (var i = 0; i < row.numOfColumns; i++) {
+        final value = row.colAt(i);
+        final column = cols.elementAt(i);
+        final columnType = column.type.getBestMatchDartType(column.length);
+        values.add(
+          _concertValueToType(value, columnType),
+        );
+      }
+      rersult.add(values);
+    }
+    return rersult;
+  }
+
+  dynamic _concertValueToType(String? value, Type columnType) {
+    if (value == null) {
+      return null;
+    }
+    if (columnType == int) {
+      return int.parse(value);
+    } else if (columnType == double) {
+      return double.parse(value);
+    } else if (columnType == bool) {
+      return value == '1' || value == 'true';
+    } else {
+      return value;
+    }
   }
 }
